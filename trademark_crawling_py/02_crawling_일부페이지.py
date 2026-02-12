@@ -6,15 +6,17 @@ import json
 
 # ================= 설정 =================
 START_DATE = "19500101"
-END_DATE = "20260129"
+END_DATE = "20260212"
 KEYWORD = f"RD=[{START_DATE}~{END_DATE}]"
 
+# 복원하고 싶은 일부 페이지 설정
 REPAIR_PAGES = [
-    4396, 4401, 20809, 21036
+    1, 3, 8, 10,
 ]
 
-DATA_FILE = "kipris_REPAIR_4396_4401_20809_21036.jsonl"
-ERROR_FILE = "kipris_REPAIR_4396_4401_20809_21036_errors.txt"
+# 저장 파일명 설정
+DATA_FILE = "kipris_REPAIR_1_3_8_10.jsonl"
+ERROR_FILE = "kipris_REPAIR_1_3_8_10_errors.txt"
 # ========================================
 
 def save_data(data_list):
