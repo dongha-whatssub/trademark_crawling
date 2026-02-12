@@ -1,0 +1,7 @@
+.venv/
+.jsonl
+.json
+.DS_Store
+.xlsx
+.ipynb
+.txt
