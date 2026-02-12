@@ -9,7 +9,7 @@ END_DATE = "20260129"
 KEYWORD = f"RD=[{START_DATE}~{END_DATE}]"
 
 # 재개 페이지
-GLOBAL_START_PAGE = 17311
+GLOBAL_START_PAGE = 1
 BATCH_SIZE = 400     # 500페이지 연속 넘길 시 웹에서 블락 명령, 접속 불가
 SAVE_INTERVAL = 10
 DATA_FILE = "kipris_registered_data.jsonl"

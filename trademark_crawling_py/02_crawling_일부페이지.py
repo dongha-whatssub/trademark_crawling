@@ -9,12 +9,14 @@ START_DATE = "19500101"
 END_DATE = "20260129"
 KEYWORD = f"RD=[{START_DATE}~{END_DATE}]"
 
+# 다시 크롤링 하고 싶은 페이지 리스트
 REPAIR_PAGES = [
-    4396, 4401, 20809, 21036
+    1, 2, 3, 5
 ]
 
-DATA_FILE = "kipris_REPAIR_4396_4401_20809_21036.jsonl"
-ERROR_FILE = "kipris_REPAIR_4396_4401_20809_21036_errors.txt"
+# 페이지 리스트 저장
+DATA_FILE = "kipris_REPAIR_1_2_3_5.jsonl"
+ERROR_FILE = "kipris_REPAIR_1_2_3_5_errors.txt"
 # ========================================
 
 def save_data(data_list):
