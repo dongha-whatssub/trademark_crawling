@@ -2,6 +2,7 @@ import asyncio
 from playwright.async_api import async_playwright
 import json
 import re
+from datetime import datetime
 
 # ================= 검색 및 제어 설정 =================
 START_DATE = "19500101"
@@ -18,7 +19,11 @@ DATA_FILE = "kipris_registered_data.jsonl"
 ERROR_FILE = "kipris_errors.txt"
 # ====================================================
 
-# [추가] 저장 로직을 함수로 분리하여 재사용
+# 시간 기록 함수
+def get_now():
+    return datetime.now().strftime("%H:%M:%S")
+
+# 저장 로직을 함수로 분리하여 재사용
 def save_data(data_list):
     if not data_list:
         return
@@ -42,7 +47,7 @@ async def run_batch(start_p, end_p):
         page.on("dialog", lambda dialog: dialog.accept())
 
         try:
-            print(f"\n🚀 [배치 시작] {start_p} ~ {end_p} 페이지 수집 개시")
+            print(f"\n🚀 [{get_now()}] 배치 시작: {start_p} ~ {end_p} 페이지 수집 개시")
             await page.goto("https://www.kipris.or.kr/khome/search/searchResult.do?tab=trademark", wait_until="domcontentloaded") # networkidle 대신 변경 (속도 향상)
             
             await page.fill("#sd010301_g04_text", KEYWORD)
@@ -82,7 +87,7 @@ async def run_batch(start_p, end_p):
             temp_results = []
 
             while current_page <= actual_end_p:
-                print(f"[P {current_page}/{total_pages}] 추출 중...")
+                print(f"[PAGE {current_page}/{total_pages}] 추출 중... {get_now()}")
                 
                 # 1. 페이지 로딩 대기
                 try:
@@ -117,34 +122,48 @@ async def run_batch(start_p, end_p):
                     try:
                         item = items.nth(i)
                         
-                        # 요소가 없을 때 에러 방지를 위한 로직 강화
+                        # 1. 제목 및 등록번호 (기존)
                         title_el = item.locator("h1.title button.link.under").first
                         if await title_el.count() == 0: continue
                         title = (await title_el.inner_text()).strip()
                         
                         reg_el = item.locator(".head-title button.tit").first
                         reg_num = (await reg_el.inner_text()).strip() if await reg_el.count() > 0 else "N/A"
+
+                        # 2. 등록 현황 (상태)
+                        # span.badge 중 data-category="a" 속성을 가진 요소를 찾습니다.
+                        status_el = item.locator("span.badge[data-category='a']").first
+                        status = (await status_el.inner_text()).strip() if await status_el.count() > 0 else "N/A"
+
+                        # 3. 상품분류 (류)
+                        # '상품분류'라는 텍스트를 포함한 li 태그 내부의 button 텍스트를 가져옵니다.
+                        category_el = item.locator("li:has-text('상품분류') button.link").first
+                        category = (await category_el.inner_text()).strip() if await category_el.count() > 0 else "N/A"
                         
+                        # 4. 출원인 및 최종권리자 
                         applicant_el = item.locator("li:has-text('출원인') button.link").first
                         applicant = (await applicant_el.inner_text()).strip() if await applicant_el.count() > 0 else "N/A"
                         
                         owner_el = item.locator("li:has-text('최종권리자') button.link").first
                         owner = (await owner_el.inner_text()).strip() if await owner_el.count() > 0 else "N/A"
 
+                        # 5. 이미지 URL
                         img_el = item.locator("a.thumb img").first
                         img_src = await img_el.get_attribute("src") if await img_el.count() > 0 else None
                         img_url = f"https://www.kipris.or.kr{img_src}" if img_src else "N/A"
 
+                        # 결과 데이터 구성
                         temp_results.append({
                             "title": title, 
-                            "reg_num": reg_num, 
+                            "reg_num": reg_num,
+                            "status": status,      
+                            "category": category,  
                             "applicant": applicant,
                             "owner": owner, 
                             "img_url": img_url, 
                             "page": current_page
                         })
-                    except Exception as e:
-                        # 개별 아이템 추출 실패는 무시하고 계속 진행
+                    except Exception as e: # 개별 아이템 추출 실패는 무시하고 계속 진행
                         continue
 
                 # 3. 저장 로직 (SAVE_INTERVAL 마다 OR 마지막 페이지)
@@ -174,7 +193,7 @@ async def run_batch(start_p, end_p):
                  print("🏁 배치 종료 전 잔여 데이터 저장")
                  save_data(temp_results)
             await browser.close()
-            print(f"💤 배치 종료. 잠시 후 재시작합니다.")
+            print(f"💤 배치 종료. 잠시 후 재시작합니다. {get_now()}")
             await asyncio.sleep(5)
 
 async def main():
@@ -184,7 +203,7 @@ async def main():
         try:
             total = await run_batch(current_start, current_end)
             if current_end >= total:
-                print("🎉 모든 수집이 완료되었습니다!")
+                print(f"🎉 모든 수집이 완료되었습니다! 총 {total}페이지 수집 완료 {get_now()}")
                 break
             current_start += BATCH_SIZE
         except Exception as e:
