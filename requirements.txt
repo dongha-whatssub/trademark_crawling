@@ -30,6 +30,9 @@ pathspec==1.0.4
 pexpect==4.9.0
 platformdirs==4.5.1
 playwright==1.57.0
+
+# 설치 후 터미널에서 실행: python -m playwright install chromium -> 전용 브라우저 설치 (필수!)
+
 pluggy==1.6.0
 prompt_toolkit==3.0.52
 psutil==7.2.2
