@@ -6,15 +6,18 @@ import json
 
 # ================= 설정 =================
 START_DATE = "19500101"
-END_DATE = "20260129"
+END_DATE = "20260212"
 KEYWORD = f"RD=[{START_DATE}~{END_DATE}]"
 
-REPAIR_START_PAGE = 10441
-REPAIR_END_PAGE   = 10675
+# 구간 복원 페이지 설정
+REPAIR_START_PAGE = 1
+REPAIR_END_PAGE   = 20
 
 SAVE_INTERVAL = 20
-DATA_FILE = "kipris_REPAIR_10441_10675.jsonl"
-ERROR_FILE = "kipris_REPAIR_10441_10675_errors.txt"
+
+# 저장 파일명 설정
+DATA_FILE = "kipris_REPAIR_1_20.jsonl"
+ERROR_FILE = "kipris_REPAIR_1_20_errors.txt"
 # ========================================
 
 def save_data(data_list):
